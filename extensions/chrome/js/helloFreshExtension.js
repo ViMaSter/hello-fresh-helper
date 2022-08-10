@@ -1,7 +1,7 @@
 {
 	{
 			let checkForReady = setInterval(() => {
-			if (!document.querySelector("[data-test-id=lazy-load-courses] [data-test-id=loading-placeholder]"))
+			if (document.querySelector("[data-test-id=lazy-load-courses]") && !document.querySelector("[data-test-id=lazy-load-courses] [data-test-id=loading-placeholder]"))
 			{
 				clearInterval(checkForReady);
 				init();
