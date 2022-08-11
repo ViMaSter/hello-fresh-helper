@@ -1,6 +1,32 @@
 {
+	let checkForReadyUnselected, checkForReadySelected = null;
+
+	var oldHref = document.location.href;
+	window.onload = function() {
+		var bodyList = document.querySelector("body")
+
+		var observer = new MutationObserver(function(mutations) {
+			mutations.forEach(function(mutation) {
+				if (oldHref != document.location.href) {
+					oldHref = document.location.href;
+					clearInterval(checkForReadyUnselected);
+					clearInterval(checkForReadySelected);
+					setupTimeouts();
+				}
+			});
+		});
+		
+		var config = {
+			childList: true,
+			subtree: true
+		};
+		
+		observer.observe(bodyList, config);
+	};
+
+	const setupTimeouts = () =>
 	{
-		let checkForReadyUnselected = setInterval(() => {
+		checkForReadyUnselected = setInterval(() => {
 			if (document.querySelector("[data-test-id=lazy-load-courses]") && !document.querySelector("[data-test-id=lazy-load-courses] [data-test-id=loading-placeholder]"))
 			{
 				clearInterval(checkForReadyUnselected);
@@ -8,15 +34,14 @@
 			}
 		}, 500);
 		
-		let checkForReadySelected = setInterval(() => {
+		checkForReadySelected = setInterval(() => {
 			if (Array.from(document.querySelectorAll("[data-test-id=selected-section-wrapper] [data-test-wrapper-id=recipe-component]")).length > 0)
 			{
 				clearInterval(checkForReadySelected);
 				initSelected();
 			}
 		}, 500);
-
-	}
+	};
 
 	let authorizationHeader = null;
 	const makeRequest = (method, url) => {
@@ -114,7 +139,6 @@
 
 	const initSelected = async () => {
 		const nextData = JSON.parse(document.querySelector("#__NEXT_DATA__").innerHTML);
-		debugger;
 		authorizationHeader = `${nextData.props.pageProps.ssrPayload.serverAuth.token_type} ${nextData.props.pageProps.ssrPayload.serverAuth.access_token}`;
 		mealsThisWeek = Array.from(document.querySelectorAll("[data-test-id=selected-section-wrapper] [data-test-wrapper-id=recipe-component]")).map(elem=>elem.parentElement).map(elementToRecipeID).map(toPromiseOfRecipeContent);
 		if (mealsThisWeek.length < 0)
@@ -127,4 +151,6 @@
 			updateElement(entry);
 		}
 	};
+
+	setupTimeouts();
 }
