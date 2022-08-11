@@ -24,6 +24,8 @@
 		observer.observe(bodyList, config);
 	};
 
+	const classKey = `hfh-${new Date().toISOString().replace(/\W/g, "-")}`;
+
 	const setupTimeouts = () =>
 	{
 		checkForReadyUnselected = setInterval(() => {
@@ -106,12 +108,22 @@
 	const updateElement = ({element, recipe}) =>
 	{
 		const container = element.querySelector("[data-test-id=recipe-card-title-description-block]");
-		const nutritionHTML = document.createElement("div");
+		let nutritionHTML = document.createElement("div");
+		nutritionHTML.classList.add(classKey);
+		const existingContainer = container.querySelector("."+classKey);
+		if (existingContainer)
+		{
+			nutritionHTML = existingContainer;
+		}
+
 		const selectedNutritionInfo = recipe.nutrition.find(nutrition=>nutrition.type == orderFoodsBy);
 		const kcals = recipe.nutrition.find(nutrition=>nutrition.type == nutritionIDs.kcal);
 		const nutritionPerCalories = toTwoDecimals((selectedNutritionInfo.amount / kcals.amount) * 100);
 		nutritionHTML.innerHTML = `${selectedNutritionInfo.name}: ${nutritionPerCalories} per 100kcal (${selectedNutritionInfo.amount}${selectedNutritionInfo.unit} @ ${kcals.amount}${kcals.unit})`;
-		container.insertBefore(nutritionHTML, container.querySelector("div:nth-child(3)"));
+		if (!existingContainer)
+		{
+			container.insertBefore(nutritionHTML, container.querySelector("div:nth-child(3)"));
+		}
 
 		const orderAmount = nutritionPerCalories * 100;
 
