@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="halfmoon/css/halfmoon-variables.min.css" rel="stylesheet" />
+    <script src="halfmoon/js/halfmoon.min.js"></script>
+    <style>
+        html, body
+        {
+            position: relative;
+        }
+
+        .wrapper
+        {
+            padding: 1em 5em 2em 5em;
+        }
+
+        .custom-radio
+        {
+            margin: .5em 1em;
+        }
+
+        .selector
+        {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+            flex-wrap: nowrap;
+        }
+    </style>
+    <script src="storage.js"></script>
+</head>
+<body class="dark-mode">
+    <div class="wrapper">
+        <div class="selector">
+            <div class="field">
+                <h2 class="content-title">field</h2>
+                <div class="field-selector custom-radio">
+                    <input type="radio" name="field" id="field-57b42a48b7e8697d4b305304" value="57b42a48b7e8697d4b305304">
+                    <label for="field-57b42a48b7e8697d4b305304">kcal</label>
+                </div>
+                <div class="field-selector custom-radio">
+                    <input type="radio" name="field" id="field-57b42a48b7e8697d4b305305" value="57b42a48b7e8697d4b305305">
+                    <label for="field-57b42a48b7e8697d4b305305">carbs</label>
+                </div>
+                <div class="field-selector custom-radio">
+                    <input type="radio" name="field" id="field-57b42a48b7e8697d4b305309" value="57b42a48b7e8697d4b305309">
+                    <label for="field-57b42a48b7e8697d4b305309">proteins</label>
+                </div>
+            </div>
+            <div class="order">
+                <h2 class="content-title">order</h2>
+                <div class="order-selector custom-radio">
+                    <input type="radio" name="order" id="order-ASC" value="ASC">
+                    <label for="order-ASC">ASC</label>
+                </div>
+                <div class="order-selector custom-radio">
+                    <input type="radio" name="order" id="order-DESC" value="DESC">
+                    <label for="order-DESC">DESC</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -95,6 +95,7 @@
 
 	const nutritionIDs = {
 		kcal: "57b42a48b7e8697d4b305304",
+		carbs: "57b42a48b7e8697d4b305305",
 		proteins: "57b42a48b7e8697d4b305309"
 	};
 
