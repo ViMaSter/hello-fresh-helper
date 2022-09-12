@@ -2,11 +2,11 @@
 	let checkForReadyUnselected, checkForReadySelected = null;
 
 	var oldHref = document.location.href;
-	window.onload = function() {
+	window.onload = function () {
 		var bodyList = document.querySelector("body")
 
-		var observer = new MutationObserver(function(mutations) {
-			mutations.forEach(function(mutation) {
+		var observer = new MutationObserver(function (mutations) {
+			mutations.forEach(function (mutation) {
 				if (oldHref != document.location.href) {
 					oldHref = document.location.href;
 					clearInterval(checkForReadyUnselected);
@@ -15,30 +15,48 @@
 				}
 			});
 		});
-		
+
 		var config = {
 			childList: true,
 			subtree: true
 		};
-		
+
 		observer.observe(bodyList, config);
 	};
 
+	chrome.storage.onChanged.addListener(function (changes, namespace) {
+		for (let [key, { newValue }] of Object.entries(changes)) {
+			if (namespace != "sync") {
+				return;
+			}
+
+			if (key == "field") {
+				orderFoodsBy = newValue;
+				initUnselected();
+				initSelected();
+				return;
+			}
+			if (key == "order") {
+				orderBy = newValue;
+				initUnselected();
+				initSelected();
+				return;
+			}
+		}
+	});
+
 	const classKey = `hfh-${new Date().toISOString().replace(/\W/g, "-")}`;
 
-	const setupTimeouts = () =>
-	{
+	const setupTimeouts = () => {
 		checkForReadyUnselected = setInterval(() => {
-			if (document.querySelector("[data-test-id=lazy-load-courses]") && !document.querySelector("[data-test-id=lazy-load-courses] [data-test-id=loading-placeholder]"))
-			{
+			if (document.querySelector("[data-test-id=lazy-load-courses]") && !document.querySelector("[data-test-id=lazy-load-courses] [data-test-id=loading-placeholder]")) {
 				clearInterval(checkForReadyUnselected);
 				initUnselected();
 			}
 		}, 500);
-		
+
 		checkForReadySelected = setInterval(() => {
-			if (Array.from(document.querySelectorAll("[data-test-id=selected-section-wrapper] [data-test-wrapper-id=recipe-component]")).length > 0)
-			{
+			if (Array.from(document.querySelectorAll("[data-test-id=selected-section-wrapper] [data-test-wrapper-id=recipe-component]")).length > 0) {
 				clearInterval(checkForReadySelected);
 				initSelected();
 			}
@@ -74,7 +92,7 @@
 	let mealsThisWeek = [];
 	const elementToRecipeID = (element) => {
 		return {
-			element, 
+			element,
 			recipe: getRecipeByID(element.querySelector("[data-test-id*=recipe]").attributes["data-recipe-id"].value)
 		};
 	};
@@ -85,10 +103,9 @@
 		return data;
 	}
 
-	const toPromiseOfRecipeContent = async ({element, recipe}) =>
-	{
+	const toPromiseOfRecipeContent = async ({ element, recipe }) => {
 		return {
-			element, 
+			element,
 			recipe: JSON.parse(await recipe)
 		};
 	}
@@ -101,37 +118,40 @@
 
 	const ASC = "ASC";
 	const DESC = "DESC";
-	const orderFoodsBy = nutritionIDs.proteins;
-	const orderBy = DESC;
+	let orderFoodsBy = nutritionIDs.proteins;
+	let orderBy = DESC;
 
 	const toTwoDecimals = (num) => Math.round(num * 100) / 100;
 
-	const updateElement = ({element, recipe}) =>
-	{
+	const updateElement = ({ element, recipe }, goUpOneElement) => {
 		const container = element.querySelector("[data-test-id=recipe-card-title-description-block]");
 		let nutritionHTML = document.createElement("div");
 		nutritionHTML.classList.add(classKey);
-		const existingContainer = container.querySelector("."+classKey);
-		if (existingContainer)
-		{
+		const existingContainer = container.querySelector("." + classKey);
+		if (existingContainer) {
 			nutritionHTML = existingContainer;
 		}
 
-		const selectedNutritionInfo = recipe.nutrition.find(nutrition=>nutrition.type == orderFoodsBy);
-		const kcals = recipe.nutrition.find(nutrition=>nutrition.type == nutritionIDs.kcal);
+		const selectedNutritionInfo = recipe.nutrition.find(nutrition => nutrition.type == orderFoodsBy);
+		const kcals = recipe.nutrition.find(nutrition => nutrition.type == nutritionIDs.kcal);
 		const nutritionPerCalories = toTwoDecimals((selectedNutritionInfo.amount / kcals.amount) * 100);
-		nutritionHTML.innerHTML = `${selectedNutritionInfo.name}: ${nutritionPerCalories} per 100kcal (${selectedNutritionInfo.amount}${selectedNutritionInfo.unit} @ ${kcals.amount}${kcals.unit})`;
-		if (!existingContainer)
+		if (selectedNutritionInfo.type == nutritionIDs.kcal)
 		{
+			nutritionHTML.innerHTML = `${selectedNutritionInfo.name}: ${selectedNutritionInfo.amount}${selectedNutritionInfo.unit}`;
+		}
+		else
+		{
+			nutritionHTML.innerHTML = `${selectedNutritionInfo.name}: ${nutritionPerCalories} per 100kcal (${selectedNutritionInfo.amount}${selectedNutritionInfo.unit} @ ${kcals.amount}${kcals.unit})`;
+		}
+		if (!existingContainer) {
 			container.insertBefore(nutritionHTML, container.querySelector("div:nth-child(3)"));
 		}
 
-		const orderAmount = nutritionPerCalories * 100;
-
-		element.style.order = -orderAmount;
-		if (orderBy == ASC)
-		{
-			element.style.order = orderAmount;
+		const orderAmount = selectedNutritionInfo.type == nutritionIDs.kcal ? Math.round(selectedNutritionInfo.amount) :  Math.round(nutritionPerCalories * 100);
+		const orderElement = goUpOneElement ? element.parentElement : element;
+		orderElement.style.order = -orderAmount;
+		if (orderBy == ASC) {
+			orderElement.style.order = orderAmount;
 		}
 	}
 
@@ -139,31 +159,32 @@
 		const nextData = JSON.parse(document.querySelector("#__NEXT_DATA__").innerHTML);
 		authorizationHeader = `${nextData.props.pageProps.ssrPayload.serverAuth.token_type} ${nextData.props.pageProps.ssrPayload.serverAuth.access_token}`;
 		mealsThisWeek = Array.from(document.querySelectorAll("[data-test-id=filtered-courses] [data-test-id=course-card]")).map(elementToRecipeID).map(toPromiseOfRecipeContent);
-		if (mealsThisWeek.length < 0)
-		{
+		if (mealsThisWeek.length < 0) {
 			throw new Error("did you scroll to the recipe list?");
 		}
 		mealsThisWeek = await Promise.all(mealsThisWeek);
-		for (entry of mealsThisWeek)
-		{
-			updateElement(entry);
+		for (entry of mealsThisWeek) {
+			updateElement(entry, false);
 		}
 	};
 
 	const initSelected = async () => {
 		const nextData = JSON.parse(document.querySelector("#__NEXT_DATA__").innerHTML);
 		authorizationHeader = `${nextData.props.pageProps.ssrPayload.serverAuth.token_type} ${nextData.props.pageProps.ssrPayload.serverAuth.access_token}`;
-		mealsThisWeek = Array.from(document.querySelectorAll("[data-test-id=selected-section-wrapper] [data-test-wrapper-id=recipe-component]")).map(elem=>elem.parentElement).map(elementToRecipeID).map(toPromiseOfRecipeContent);
-		if (mealsThisWeek.length < 0)
-		{
+		mealsThisWeek = Array.from(document.querySelectorAll("[data-test-id=selected-section-wrapper] [data-test-wrapper-id=recipe-component]")).map(elem => elem.parentElement).map(elementToRecipeID).map(toPromiseOfRecipeContent);
+		if (mealsThisWeek.length < 0) {
 			throw new Error("did you scroll to the recipe list?");
 		}
 		mealsThisWeek = await Promise.all(mealsThisWeek);
-		for (entry of mealsThisWeek)
-		{
-			updateElement(entry);
+		for (entry of mealsThisWeek) {
+			updateElement(entry, true);
 		}
 	};
 
-	setupTimeouts();
+	chrome.storage.sync.get(["field", "order"], (values) => {
+		orderFoodsBy = values["field"] || nutritionIDs.kcal;
+		orderBy = values["order"] || "DESC";
+		setupTimeouts();
+	});
+
 }
