@@ -147,6 +147,13 @@
 			container.insertBefore(nutritionHTML, container.querySelector("div:nth-child(3)"));
 		}
 
+		const linkContainer = document.createElement("a");
+		linkContainer.innerHTML = `<div style="display: inline" class="web-3205mz"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path fill="#067A46" fill-rule="evenodd" d="M14 20v-4.5c-.695 0-1.362.034-2 .099-3.381.34-5.96 1.526-7.734 2.917C3.244 19.316 2.489 20.185 2 21c0-1.34.178-2.54.491-3.613C4.746 9.657 14 8.5 14 8.5V4l8 8.004L14 20zm2-4.826l3.172-3.17L16 8.83v1.436l-1.746.218-.011.001a9.638 9.638 0 00-.384.065c-.282.054-.696.144-1.199.283-1.012.281-2.341.755-3.652 1.52-1.216.709-2.4 1.652-3.312 2.935C7.918 14.21 10.698 13.5 14 13.5h2v1.674z" clip-rule="evenodd"></path></svg></div>`;
+		linkContainer.href = `https://www.hellofresh.de/recipes/item-${recipe.id}`;
+		nutritionHTML.appendChild(linkContainer);
+
+		nutritionHTML.parentElement.querySelector("[data-test-id=ellipsis-container]").remove();
+
 		const orderAmount = selectedNutritionInfo.type == nutritionIDs.kcal ? Math.round(selectedNutritionInfo.amount) :  Math.round(nutritionPerCalories * 100);
 		const orderElement = goUpOneElement ? element.parentElement : element;
 		orderElement.style.order = -orderAmount;
