@@ -3,7 +3,7 @@
   "name": "Hello Fresh Enhancement",
   "short_name": "Hello Fresh Enhancement",
   "description": "Adds nutrition info and sorting options to the meal overview",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "icons": {
     "128": "icon.png"
   },

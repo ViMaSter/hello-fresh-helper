@@ -152,7 +152,11 @@
 		linkContainer.href = `https://www.hellofresh.de/recipes/item-${recipe.id}`;
 		nutritionHTML.appendChild(linkContainer);
 
-		nutritionHTML.parentElement.querySelector("[data-test-id=ellipsis-container]").remove();
+		var ellipsis = nutritionHTML.parentElement.querySelector("[data-test-id=ellipsis-container]");
+		if (ellipsis)
+		{
+			ellipsis.remove();
+		}
 
 		const orderAmount = selectedNutritionInfo.type == nutritionIDs.kcal ? Math.round(selectedNutritionInfo.amount) :  Math.round(nutritionPerCalories * 100);
 		const orderElement = goUpOneElement ? element.parentElement : element;
